@@ -54,13 +54,8 @@ rustup default stable-msvc
 ```bash
 git clone https://github.com/tangxiangong/tauri-demo.git
 cd tauri-demo
-```
-在 https://account.mapbox.com/ 获取你的免费访问令牌，并将其添加到环境变量 `VITE_MAPBOX_ACCESS_TOKEN` 中，或者在项目根目录下新建 `.env` 文件，内容为：
-```env
-VITE_MAPBOX_ACCESS_TOKEN=你的 token
-```
-```bash
-yarn 
 yarn install
 yarn tauri dev
 ```
+
+首次运行时，程序会自动提示配置 Mapbox Token。你可以在 https://account.mapbox.com/ 获取免费的访问令牌。配置完成后，Token 会自动保存到本地，下次启动时无需重新配置。
