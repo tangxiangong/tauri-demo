@@ -7,6 +7,7 @@ import {
 } from '@tauri-apps/plugin-geolocation';
 import { Store } from '@tauri-apps/plugin-store';
 import { exit } from '@tauri-apps/plugin-process';
+import { isPermissionGranted, requestPermission, sendNotification } from '@tauri-apps/plugin-notification';
 
 // 配置管理类
 class ConfigManager {
@@ -177,28 +178,49 @@ class LocationService {
       let permissions = await checkPermissions();
       console.log('当前权限状态:', permissions);
 
-      // macOS 特殊处理
-      if (permissions.location === 'prompt' || permissions.location === 'prompt-with-rationale') {
-        console.log('请求位置权限...');
+      // 权限处理
+      if (permissions.location !== 'granted') {
+        console.log('位置权限未授予，尝试请求权限...');
 
-        // 在 macOS 上，可能需要多次尝试权限请求
-        try {
-          permissions = await requestPermissions(['location']);
-          console.log('权限请求结果:', permissions);
+        // 多次尝试请求权限
+        for (let i = 0; i < 3; i++) {
+          console.log(`第 ${i + 1} 次请求位置权限...`);
+          try {
+            permissions = await requestPermissions(['location']);
+            console.log('权限请求结果:', permissions);
 
-          // 如果仍然是 prompt 状态，给用户更明确的指导
-          if (permissions.location === 'prompt') {
-            this.showLocationError({
-              code: 1,
-              message: '请在 系统偏好设置 > 安全性与隐私 > 隐私 > 位置服务 中允许此应用访问位置信息，然后重启应用。'
-            });
-            return;
+            if (permissions.location === 'granted') {
+              console.log('权限请求成功！');
+              break;
+            } else {
+              console.log(`权限请求未成功，状态: ${permissions.location}`);
+            }
+          } catch (error) {
+            console.error(`第 ${i + 1} 次权限请求失败:`, error);
           }
-        } catch (error) {
-          console.error('权限请求失败:', error);
+
+          // 短暂等待后再次尝试
+          if (i < 2) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        }
+
+        // 如果权限仍未授予
+        if (permissions.location !== 'granted') {
+          // 根据平台提供不同的指导
+          let errorMessage = '位置权限被拒绝';
+
+          if (navigator.platform.includes('Mac')) {
+            errorMessage = '请在 系统设置 > 隐私与安全性 > 位置服务 中允许此应用访问位置信息，然后重启应用。';
+          } else if (navigator.platform.includes('Win')) {
+            errorMessage = '请在 Windows 设置 > 隐私 > 位置 中允许此应用访问位置信息，然后重启应用。';
+          } else {
+            errorMessage = '请在系统设置中允许此应用访问位置信息，然后重启应用。';
+          }
+
           this.showLocationError({
             code: 1,
-            message: '权限请求失败。请在系统设置中手动允许位置访问权限。'
+            message: errorMessage
           });
           return;
         }
@@ -297,7 +319,7 @@ class LocationService {
     `, 'success');
   }
 
-  private showLocationError(error: GeolocationPositionError | any) {
+  private async showLocationError(error: GeolocationPositionError | any) {
     let errorMessage = '定位失败';
     let errorDetail = '';
 
@@ -305,7 +327,7 @@ class LocationService {
       switch (error.code) {
         case 1:
           errorMessage = '权限被拒绝';
-          errorDetail = '请在浏览器或系统设置中允许位置访问权限';
+          errorDetail = '请在系统设置中允许位置访问权限';
           break;
         case 2:
           errorMessage = '位置不可用';
@@ -323,6 +345,7 @@ class LocationService {
       errorDetail = error.message || '请检查网络连接或重试';
     }
 
+    // 创建界面通知
     this.createNotification(errorMessage, `
       <div class="notification-content">
         <div class="notification-icon">❌</div>
@@ -332,6 +355,30 @@ class LocationService {
         </div>
       </div>
     `, 'error');
+
+    // 尝试发送系统通知
+    try {
+      // 检查通知权限
+      let permissionGranted = await isPermissionGranted();
+
+      if (!permissionGranted) {
+        // 请求通知权限
+        const result = await requestPermission();
+        permissionGranted = result === 'granted';
+      }
+
+      if (permissionGranted) {
+        // 发送系统通知
+        await sendNotification({
+          title: errorMessage,
+          body: errorDetail,
+          icon: './src-tauri/icons/icon.png'
+        });
+      }
+    } catch (notificationError) {
+      console.error('发送系统通知失败:', notificationError);
+      // 系统通知失败不影响应用流程
+    }
   }
 
   private createNotification(_title: string, content: string, type: 'success' | 'error') {
@@ -385,28 +432,69 @@ class LocationService {
   // 手动触发定位
   async triggerLocation() {
     try {
+      console.log('手动触发定位...');
+
       // 首先尝试检查Tauri权限
       const tauriPermission = await this.checkTauriLocationPermission();
+      console.log('Tauri位置权限状态:', tauriPermission);
 
+      // 如果权限被明确拒绝
       if (tauriPermission && tauriPermission.location === 'denied') {
         this.showLocationError({
           code: 1,
-          message: '地理位置权限被拒绝，请在系统设置中允许位置访问'
+          message: '地理位置权限被拒绝，请在系统设置中允许位置访问后重启应用'
         });
         return;
       }
 
-      // 如果权限OK，先尝试使用Tauri API
-      if (tauriPermission && tauriPermission.location === 'granted') {
-        await this.tryTauriGeolocation();
-      } else {
-        // 否则使用Mapbox的定位控件
-        this.geolocateControl.trigger();
+      // 如果权限未授予，尝试请求权限
+      if (tauriPermission && tauriPermission.location !== 'granted') {
+        console.log('尝试请求Tauri位置权限...');
+        try {
+          const newPermissions = await requestPermissions(['location']);
+          console.log('权限请求结果:', newPermissions);
+
+          // 如果请求后权限仍未授予
+          if (newPermissions.location !== 'granted') {
+            // 根据平台提供不同的指导
+            let errorMessage = '位置权限被拒绝';
+
+            if (navigator.platform.includes('Mac')) {
+              errorMessage = '请在 系统设置 > 隐私与安全性 > 位置服务 中允许此应用访问位置信息，然后重启应用。';
+            } else if (navigator.platform.includes('Win')) {
+              errorMessage = '请在 Windows 设置 > 隐私 > 位置 中允许此应用访问位置信息，然后重启应用。';
+            } else {
+              errorMessage = '请在系统设置中允许此应用访问位置信息，然后重启应用。';
+            }
+
+            this.showLocationError({
+              code: 1,
+              message: errorMessage
+            });
+            return;
+          }
+        } catch (error) {
+          console.error('权限请求失败:', error);
+          this.showLocationError({
+            code: 1,
+            message: '权限请求失败，请在系统设置中手动允许位置访问'
+          });
+          return;
+        }
       }
 
+      // 如果权限OK，先尝试使用Tauri API
+      console.log('尝试使用Tauri API获取位置...');
+      try {
+        await this.tryTauriGeolocation();
+      } catch (error) {
+        console.error('Tauri定位失败，尝试使用Mapbox定位:', error);
+        // 回退到Mapbox定位
+        this.geolocateControl.trigger();
+      }
     } catch (error) {
       console.error('触发定位失败:', error);
-      // 回退到Mapbox定位
+      // 最后尝试使用Mapbox定位
       this.geolocateControl.trigger();
     }
   }
@@ -542,8 +630,6 @@ class ConfigUI {
       }
     });
 
-
-
     // ESC 键关闭
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && configModal?.classList.contains('show')) {
@@ -595,8 +681,6 @@ class ConfigUI {
         button.title = '显示 Token';
       }
     });
-
-
   }
 
   private async saveToken(token: string) {
@@ -661,8 +745,6 @@ class ConfigUI {
       statusEl.className = 'config-status';
     }
   }
-
-
 }
 
 // 主应用类
@@ -677,30 +759,45 @@ class App {
   }
 
   async initialize() {
-    console.log('应用开始初始化...');
-
-    // 显示加载状态
-    this.showLoadingScreen();
-
     try {
-      // 检查配置
-      console.log('检查已存储的配置...');
-      const token = await initializeMapboxToken(this.configManager);
-      console.log('配置检查结果:', token ? '找到有效配置' : '未找到配置');
+      console.log('初始化应用...');
+      this.showLoadingScreen();
 
-      if (!token) {
-        console.log('没有配置，显示欢迎界面');
-        // 没有配置，显示配置界面
-        this.showConfigScreen();
-      } else {
-        console.log('找到配置，初始化地图...');
-        // 有配置，初始化地图
-        await this.initializeMap(token);
+      // 初始化配置管理器
+      this.configManager = new ConfigManager();
+
+      // 主动请求位置权限
+      try {
+        console.log('主动请求位置权限...');
+        const permissions = await checkPermissions();
+        console.log('当前位置权限状态:', permissions);
+
+        if (permissions.location !== 'granted') {
+          console.log('位置权限未授予，尝试请求...');
+          const result = await requestPermissions(['location']);
+          console.log('位置权限请求结果:', result);
+        }
+      } catch (error) {
+        console.error('请求位置权限失败:', error);
+        // 继续初始化流程，不阻塞
       }
+
+      // 获取 token
+      const token = await initializeMapboxToken(this.configManager);
+
+      // 如果没有 token，显示配置界面
+      if (!token) {
+        console.log('未找到 token，显示配置界面');
+        this.showConfigScreen();
+        return;
+      }
+
+      // 如果有 token，初始化地图
+      console.log('找到 token，初始化地图');
+      await this.initializeMap(token);
     } catch (error) {
       console.error('应用初始化失败:', error);
-      // 发生错误时也显示配置界面
-      this.showConfigScreen();
+      this.showMapError();
     }
   }
 

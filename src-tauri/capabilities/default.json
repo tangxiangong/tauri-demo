@@ -24,6 +24,8 @@
     "store:allow-length",
     "store:allow-load",
     "store:default",
-    "process:allow-exit"
+    "process:allow-exit",
+    "notification:default",
+    "notification:allow-show"
   ]
 }
