@@ -459,3 +459,356 @@ body {
     }
   }
 }
+
+/* 配置按钮样式 */
+.config-button {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #667eea;
+  color: #667eea;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.config-button:hover {
+  background: #667eea;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+/* 配置弹窗样式 */
+.config-modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.config-modal.show {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: modalFadeIn 0.3s ease;
+}
+
+.config-modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: modalSlideIn 0.3s ease;
+  overflow: hidden;
+}
+
+.config-modal-header {
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.config-modal-header h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.config-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.config-close:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.config-modal-body {
+  padding: 24px;
+}
+
+.config-description {
+  margin: 0 0 20px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.config-description a {
+  color: #667eea;
+  text-decoration: none;
+}
+
+.config-description a:hover {
+  text-decoration: underline;
+}
+
+.config-input-group {
+  margin-bottom: 20px;
+}
+
+.config-input-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.config-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.config-input {
+  width: 100%;
+  padding: 12px 50px 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+  font-family: 'SF Mono', Monaco, monospace;
+}
+
+.toggle-visibility-btn {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+  z-index: 1;
+}
+
+.toggle-visibility-btn:hover {
+  background: rgba(102, 126, 234, 0.1);
+  opacity: 1;
+}
+
+.config-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+
+
+.config-status {
+  min-height: 20px;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.config-status.success {
+  color: #10b981;
+}
+
+.config-status.error {
+  color: #ef4444;
+}
+
+.config-modal-footer {
+  padding: 16px 24px 24px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.config-save-btn,
+.config-cancel-btn,
+.config-delete-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.config-save-btn {
+  background: #667eea;
+  color: white;
+}
+
+.config-save-btn:hover {
+  background: #5a67d8;
+  transform: translateY(-1px);
+}
+
+.config-save-btn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.config-cancel-btn {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.config-cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+.config-delete-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.config-delete-btn:hover {
+  background: #dc2626;
+}
+
+/* 动画效果 */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .config-button {
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+    top: 15px;
+    right: 15px;
+  }
+
+  .config-modal-content {
+    width: 95%;
+    margin: 20px;
+  }
+
+  .config-modal-header,
+  .config-modal-body,
+  .config-modal-footer {
+    padding: 16px;
+  }
+
+  .config-modal-header {
+    padding-bottom: 12px;
+  }
+
+  .config-modal-footer {
+    padding-top: 12px;
+  }
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .config-button {
+    background: rgba(31, 41, 55, 0.9);
+    border-color: #667eea;
+    color: #667eea;
+  }
+
+  .config-button:hover {
+    background: #667eea;
+    color: white;
+  }
+
+  .config-modal-content {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+
+  .config-modal-header {
+    border-bottom-color: #374151;
+  }
+
+  .config-modal-header h3 {
+    color: #f9fafb;
+  }
+
+  .config-close {
+    color: #9ca3af;
+  }
+
+  .config-close:hover {
+    background: #374151;
+    color: #d1d5db;
+  }
+
+  .config-description {
+    color: #d1d5db;
+  }
+
+  .config-input-group label {
+    color: #f3f4f6;
+  }
+
+  .config-input {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+
+  .config-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+  }
+
+  .config-cancel-btn {
+    background: #374151;
+    color: #d1d5db;
+  }
+
+  .config-cancel-btn:hover {
+    background: #4b5563;
+  }
+
+  .toggle-visibility-btn:hover {
+    background: rgba(102, 126, 234, 0.2);
+  }
+}

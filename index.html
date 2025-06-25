@@ -13,6 +13,46 @@
 <body>
   <main class="container">
     <div id="map" class="map-container"></div>
+    <!-- 配置按钮 -->
+    <button id="config-btn" class="config-button" title="配置 Mapbox Token">
+      ⚙️
+    </button>
+
+    <!-- 配置弹窗 -->
+    <div id="config-modal" class="config-modal">
+      <div class="config-modal-content">
+        <div class="config-modal-header">
+          <h3>配置 Mapbox Token</h3>
+          <button id="config-close" class="config-close">&times;</button>
+        </div>
+        <div class="config-modal-body">
+          <p class="config-description">
+            您可以在
+            <a href="https://account.mapbox.com/" target="_blank">Mapbox 官网</a>
+            免费获取。
+          </p>
+          <div class="config-input-group">
+            <label for="token-input"></label>
+            <div class="config-input-container">
+              <input type="password" id="token-input" placeholder="请输入您的 Mapbox Token (以 pk. 开头)"
+                class="config-input" />
+              <button type="button" id="toggle-token-visibility" class="toggle-visibility-btn" title="显示/隐藏 Token">
+                👁️
+              </button>
+            </div>
+          </div>
+          <div class="config-status" id="config-status"></div>
+        </div>
+        <div class="config-modal-footer">
+          <button id="token-delete" class="config-delete-btn" style="display: none;">删除配置</button>
+          <div style="flex: 1;"></div>
+          <button id="token-save" class="config-save-btn">保存</button>
+          <button id="token-cancel" class="config-cancel-btn">取消</button>
+        </div>
+
+
+      </div>
+    </div>
   </main>
 </body>
 

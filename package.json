@@ -13,6 +13,8 @@
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-geolocation": "^2.2.5",
     "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-process": "^2.2.2",
+    "@tauri-apps/plugin-store": "^2",
     "mapbox-gl": "^3.12"
   },
   "devDependencies": {
