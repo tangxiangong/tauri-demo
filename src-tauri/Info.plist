@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleDisplayName</key>
+    <string>tauri-demo</string>
+    <key>CFBundleExecutable</key>
+    <string>tauri-demo</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.xiaoyu.tauri-demo</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>tauri-demo</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.1.0</string>
+    <key>CFBundleVersion</key>
+    <string>0.1.0</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>10.13</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright © 2024. All rights reserved.</string>
+    
+    <!-- 地理位置权限描述 -->
+    <key>NSLocationUsageDescription</key>
+    <string>此应用需要访问您的位置信息以提供基于位置的地图功能。</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>此应用需要在使用时访问您的位置信息以显示您在地图上的当前位置。</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>此应用需要访问您的位置信息以提供完整的地图功能体验。</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>此应用需要始终访问您的位置信息以提供持续的位置服务。</string>
+</dict>
+</plist> 
